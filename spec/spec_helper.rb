@@ -6,9 +6,6 @@ require 'spec'
 require 'spec/interop/test'
 require 'stringio'
 require 'webrick'
-require 'rubygems/test_utilities'
-require 'tmpdir'
-require 'uri'
 
 Sinatra::Default.set(
   :environment => :test,
