@@ -48,19 +48,15 @@ end
 
 Spec::Runner.configure do |config|
   config.before(:each) {
-
     @app = Rack::Builder.new {
       use GemsAndRdocs, :urls => ['/cache', '/doc'], :root => Gem.dir
       use Rack::Compress
       run RackRubygems.new
     }
-
     @webrick = Gem::Server.new Gem.dir, process_based_port, false
     @webrick_request = WEBrick::HTTPRequest.new :Logger => nil
     @webrick_response = WEBrick::HTTPResponse.new :HTTPVersion => '1.0'
-
   }
-
   config.include Sinatra::Test
   config.include RackRubygemsTestHelpers
 end
