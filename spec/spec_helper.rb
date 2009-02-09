@@ -6,6 +6,7 @@ require 'spec'
 require 'spec/interop/test'
 require 'stringio'
 require 'webrick'
+require File.expand_path(File.dirname(__FILE__) + "/../lib/rack_rubygems.rb")
 
 Sinatra::Default.set(
   :environment => :test,
@@ -14,16 +15,14 @@ Sinatra::Default.set(
   :logging => true
 )
 
-require File.expand_path(File.dirname(__FILE__) + "/../lib/rack_rubygems.rb")
-
 module RackRubygemsTestHelpers
 
   def should_match_webrick_behavior(url, server_method, method = :get)
     #webrick
     data = StringIO.new "#{method.to_s.capitalize} #{url} HTTP/1.0\r\n\r\n"
     @webrick_request.parse data
-
     @webrick.send(server_method, @webrick_request, @webrick_response)
+
     #sinatra
     send(method, url)
     @response.should be_ok
@@ -40,10 +39,6 @@ module RackRubygemsTestHelpers
     }
   end
 
-  def process_based_port
-    @@process_based_port ||= 8000 + $$ % 1000
-  end
-
 end
 
 Spec::Runner.configure do |config|
@@ -53,7 +48,7 @@ Spec::Runner.configure do |config|
       use Rack::Compress
       run RackRubygems.new
     }
-    @webrick = Gem::Server.new Gem.dir, process_based_port, false
+    @webrick = Gem::Server.new Gem.dir, (8000 + $$ % 1000), false
     @webrick_request = WEBrick::HTTPRequest.new :Logger => nil
     @webrick_response = WEBrick::HTTPResponse.new :HTTPVersion => '1.0'
   }
