@@ -26,21 +26,18 @@ module RackRubygemsTestHelpers
     @webrick.send(server_method, @webrick_request, @webrick_response)
     #sinatra
     send(method, url)
+    @response.should be_ok
 
     #verify
-    @response['Content-Type'].should == @webrick_response['Content-Type']
-    @response.status.should == @webrick_response.status
-
-    if method == :head
-      #the default gem server misbehaves and never sends a Content-Length
-      #header, so we only check on HEAD requests, which are only implemented
-      #in the gem server for providing gem counts via Content-Length
-      @response.headers['Content-Length'].to_i.should > 0
-    else
-      #the default gem server misbehaves and returns a body when retrieving a
-      #HEAD request, so we don't verify
-      @response.body.length.should == @webrick_response.body.length
-    end
+    {
+      :status =>          @response.status,
+      :content_type =>    @response['Content-Type'],
+      :body_length =>     ((method == :head) ? nil : @response.body.length )
+    }.should == {
+      :status =>          @webrick_response.status,
+      :content_type =>    @webrick_response['Content-Type'],
+      :body_length =>     ((method == :head) ? nil : @webrick_response.body.length )
+    }
   end
 
   def quick_gem(gemname, version='2')

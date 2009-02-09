@@ -17,6 +17,7 @@ describe "The Rack Rubygems Server" do
   it 'provides marshal data' do
     should_match_webrick_behavior "/Marshal.#{Gem.marshal_version}", :Marshal
     should_match_webrick_behavior "/Marshal.#{Gem.marshal_version}", :Marshal, :head
+    @response.headers['Content-Length'].to_i.should > 0
   end
 
   it 'provides compressed marshal data' do
@@ -26,6 +27,7 @@ describe "The Rack Rubygems Server" do
   it 'provides latest specs' do
     should_match_webrick_behavior "/latest_specs.#{Gem.marshal_version}", :latest_specs
     should_match_webrick_behavior "/latest_specs.#{Gem.marshal_version}", :latest_specs, :head
+    @response.headers['Content-Length'].to_i.should > 0
   end
 
   it 'provides compressed latest specs' do
@@ -35,6 +37,7 @@ describe "The Rack Rubygems Server" do
   it 'provides specs' do
     should_match_webrick_behavior "/specs.#{Gem.marshal_version}", :specs
     should_match_webrick_behavior "/specs.#{Gem.marshal_version}", :specs, :head
+    @response.headers['Content-Length'].to_i.should > 0
   end
 
   it 'provides compressed specs' do
@@ -44,6 +47,7 @@ describe "The Rack Rubygems Server" do
   it 'provides yaml' do
     should_match_webrick_behavior "/yaml.#{Gem.marshal_version}", :yaml
     should_match_webrick_behavior "/yaml.#{Gem.marshal_version}", :yaml, :head
+    @response.headers['Content-Length'].to_i.should > 0
   end
 
   it 'provides compressed yaml' do

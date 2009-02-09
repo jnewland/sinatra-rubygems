@@ -11,7 +11,7 @@ require File.expand_path(File.dirname(__FILE__) + "/gems_and_rdocs")
 class RackRubygems < Sinatra::Base
 
   head "/Marshal.#{Gem.marshal_version}" do
-    response['Content-Type'] = 'application/octet-stream'
+    content_type 'application/octet-stream'
     response['Content-Length'] = source_index.length.to_s
   end
 
@@ -20,7 +20,7 @@ class RackRubygems < Sinatra::Base
   end
 
   head "/latest_specs.#{Gem.marshal_version}" do
-    response['Content-Type'] = 'application/octet-stream'
+    content_type 'application/octet-stream'
     response['Content-Length'] = latest_specs.length.to_s
   end
 
@@ -29,7 +29,7 @@ class RackRubygems < Sinatra::Base
   end
 
   head "/specs.#{Gem.marshal_version}" do
-    response['Content-Type'] = 'application/octet-stream'
+    content_type 'application/octet-stream'
     response['Content-Length'] = specs.length.to_s
   end
 
@@ -38,12 +38,12 @@ class RackRubygems < Sinatra::Base
   end
 
   head "/yaml.#{Gem.marshal_version}" do
-    response['Content-Type'] = 'text/plain'
+    content_type 'text/plain'
     response['Content-Length'] = source_index.length.to_s
   end
 
   get "/yaml.#{Gem.marshal_version}" do
-    response['Content-Type'] = 'text/plain'
+    content_type 'text/plain'
     yaml
   end
 
@@ -57,7 +57,7 @@ class RackRubygems < Sinatra::Base
   end
 
   def marshal(data)
-    response['Content-Type'] = 'application/octet-stream'
+    content_type 'application/octet-stream'
     Marshal.dump(data)
   end
 
