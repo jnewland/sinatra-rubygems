@@ -3,4 +3,5 @@ $:.unshift LIB_PATH
 require 'rack_rubygems'
 use Rack::Lint
 use GemsAndRdocs, :urls => ['/cache', '/doc'], :root => Gem.dir
+use Rack::Compress
 run RackRubygems.new

@@ -9,8 +9,6 @@ require File.expand_path(File.dirname(__FILE__) + "/gems_and_rdocs")
 
 class RackRubygems < Sinatra::Base
 
-  use Rack::Compress
-  
   head "/Marshal.#{Gem.marshal_version}" do
     content_type 'application/octet-stream'
     response['Content-Length'] = source_index.length.to_s

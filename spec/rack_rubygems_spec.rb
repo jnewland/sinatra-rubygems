@@ -56,17 +56,11 @@ describe "The Rack Rubygems Server" do
 
   describe "provides access to individual gemspecs" do
     it "via name and version" do
-      should_match_webrick_behavior "/quick/a-1.gemspec.rz", :quick
+      should_match_webrick_behavior "/quick/rack-0.9.1.gemspec.rz", :quick
     end
 
     it "via name, version, and platform" do
-      a1_p = quick_gem 'a', '1' do |s| s.platform = Gem::Platform.local end
-      should_match_webrick_behavior "/quick/a-1-#{Gem::Platform.local}.gemspec.rz", :quick
-    end
-
-    it "performing substring matching" do
-      ab1 = quick_gem 'ab', '1'
-      should_match_webrick_behavior "/quick/ab-1.gemspec.rz", :quick
+      should_match_webrick_behavior "/quick/rack-0.9.1-#{Gem::Platform.local}.gemspec.rz", :quick
     end
 
     it "via a quick index" do
@@ -91,11 +85,11 @@ describe "The Rack Rubygems Server" do
     end
 
     it "marshalled via name and version" do
-      should_match_webrick_behavior "/quick/Marshal.#{Gem.marshal_version}/a-1.gemspec.rz", :quick
+      should_match_webrick_behavior "/quick/Marshal.#{Gem.marshal_version}/rack-0.9.1.gemspec.rz", :quick
     end
 
     it "marshalled via name, version, and platform" do
-      should_match_webrick_behavior "/quick/Marshal.#{Gem.marshal_version}/a-1-#{Gem::Platform.local}.gemspec.rz", :quick
+      should_match_webrick_behavior "/quick/Marshal.#{Gem.marshal_version}/rack-0.9.1-#{Gem::Platform.local}.gemspec.rz", :quick
     end
   end
 
