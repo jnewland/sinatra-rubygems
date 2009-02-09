@@ -4,12 +4,13 @@ require 'yaml'
 require 'zlib'
 require 'erb'
 require 'rubygems'
-require 'rubygems/doc_manager'
 require File.expand_path(File.dirname(__FILE__) + "/rack_compress")
 require File.expand_path(File.dirname(__FILE__) + "/gems_and_rdocs")
 
 class RackRubygems < Sinatra::Base
 
+  use Rack::Compress
+  
   head "/Marshal.#{Gem.marshal_version}" do
     content_type 'application/octet-stream'
     response['Content-Length'] = source_index.length.to_s
@@ -47,6 +48,36 @@ class RackRubygems < Sinatra::Base
     yaml
   end
 
+  get '/quick/index' do
+    content_type 'text/plain'
+    source_index.map { |name,| name }.sort.join("\n")
+  end
+
+  get '/quick/index.rz' do
+    content_type 'application/x-deflate'
+    Gem.deflate(source_index.map { |name,| name }.sort.join("\n"))
+  end
+
+  get "/quick/latest_index" do
+    content_type 'text/plain'
+    source_index.latest_specs.map { |spec| spec.full_name }.sort.join("\n")
+  end
+
+  get "/quick/latest_index.rz" do
+    content_type 'application/x-deflate'
+    Gem.deflate(source_index.latest_specs.map { |spec| spec.full_name }.sort.join("\n"))
+  end
+
+  get "/quick/:selector.gemspec.rz" do
+    content_type 'application/x-deflate'
+    Gem.deflate(quick(params[:selector]).to_yaml)
+  end
+
+  get "/quick/Marshal.#{Gem.marshal_version}/:selector.gemspec.rz" do
+    content_type 'application/x-deflate'
+    Gem.deflate(marshal(quick(params[:selector])))
+  end
+
   def source_index
     @gem_dir = Gem.dir
     @spec_dir = File.join @gem_dir, 'specifications'
@@ -54,6 +85,33 @@ class RackRubygems < Sinatra::Base
     response['Date'] = File.stat(@spec_dir).mtime.to_s
     @source_index.refresh!
     @source_index
+  end
+
+  def quick(selector)
+    source_index
+    return unless selector =~ /(.*?)-([0-9.]+)(-.*?)?/
+    name, version, platform = $1, $2, $3
+    specs = source_index.search Gem::Dependency.new(name, version)
+
+    selector = [name, version, platform].map { |s| s.inspect }.join ' '
+
+    if platform
+      platform = Gem::Platform.new platform.sub(/^-/, '')
+    else
+      platform = Gem::Platform::RUBY
+    end
+
+    specs = specs.select { |s| s.platform == platform }
+
+    if specs.empty?
+      content_type 'text/plain'
+      not_found "No gems found matching #{selector}"
+    elsif specs.length > 1
+      content_type 'text/plain'
+      error 500, "Multiple gems found matching #{selector}"
+    else
+      specs.first
+    end
   end
 
   def marshal(data)

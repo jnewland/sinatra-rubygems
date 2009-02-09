@@ -55,16 +55,48 @@ describe "The Rack Rubygems Server" do
   end
 
   describe "provides access to individual gemspecs" do
-    it "via name and version"
-    it "via name, version, and platform"
-    it "performing substring matching"
-    it "and a quick index"
-    it "and a quick compressed index"
-    it "and a latest index"
-    it "and a compressed latest index"
-    it "returns a 404 when accessing a missing gem"
-    it "marshalled via name and version"
-    it "marshalled via name, version, and platform"
+    it "via name and version" do
+      should_match_webrick_behavior "/quick/a-1.gemspec.rz", :quick
+    end
+
+    it "via name, version, and platform" do
+      a1_p = quick_gem 'a', '1' do |s| s.platform = Gem::Platform.local end
+      should_match_webrick_behavior "/quick/a-1-#{Gem::Platform.local}.gemspec.rz", :quick
+    end
+
+    it "performing substring matching" do
+      ab1 = quick_gem 'ab', '1'
+      should_match_webrick_behavior "/quick/ab-1.gemspec.rz", :quick
+    end
+
+    it "via a quick index" do
+      should_match_webrick_behavior "/quick/index", :quick
+    end
+
+    it "via a quick compressed index" do
+      should_match_webrick_behavior "/quick/index.rz", :quick
+    end
+
+    it "via a quick latest index" do
+      should_match_webrick_behavior "/quick/latest_index", :quick
+    end
+
+    it "via a quick compressed latest index" do
+      should_match_webrick_behavior "/quick/latest_index.rz", :quick
+    end
+
+    it "returns a 404 when accessing a missing gem" do
+      get "/quick/z-9.gemspec.rz"
+      @response.should_not be_ok
+    end
+
+    it "marshalled via name and version" do
+      should_match_webrick_behavior "/quick/Marshal.#{Gem.marshal_version}/a-1.gemspec.rz", :quick
+    end
+
+    it "marshalled via name, version, and platform" do
+      should_match_webrick_behavior "/quick/Marshal.#{Gem.marshal_version}/a-1-#{Gem::Platform.local}.gemspec.rz", :quick
+    end
   end
 
 end

@@ -6,12 +6,15 @@ require 'spec'
 require 'spec/interop/test'
 require 'stringio'
 require 'webrick'
- 
+require 'rubygems/test_utilities'
+require 'tmpdir'
+require 'uri'
+
 Sinatra::Default.set(
   :environment => :test,
   :run => false,
   :raise_errors => true,
-  :logging => false
+  :logging => true
 )
 
 require File.expand_path(File.dirname(__FILE__) + "/../lib/rack_rubygems.rb")
@@ -40,6 +43,7 @@ module RackRubygemsTestHelpers
     }
   end
 
+  #stub gem
   def quick_gem(gemname, version='2')
     require 'rubygems/specification'
 
@@ -70,11 +74,6 @@ module RackRubygemsTestHelpers
   end
 
   def write_file(path)
-    tmpdir = nil
-    Dir.chdir Dir.tmpdir do tmpdir = Dir.pwd end # HACK OSX /private/tmp
-    @tempdir = File.join tmpdir, "test_rubygems_#{$$}"
-    @tempdir.untaint
-    @gemhome = File.join @tempdir, "gemhome"
     path = File.join(@gemhome, path)
     dir = File.dirname path
     FileUtils.mkdir_p dir
@@ -94,11 +93,52 @@ end
 
 Spec::Runner.configure do |config|
   config.before(:each) {
+
+    tmpdir = nil
+    Dir.chdir Dir.tmpdir do tmpdir = Dir.pwd end # HACK OSX /private/tmp
+    @tempdir = File.join tmpdir, "test_rubygems_#{$$}"
+    @tempdir.untaint
+    @gemhome = File.join @tempdir, "gemhome"
+    @gemcache = File.join(@gemhome, "source_cache")
+    @usrcache = File.join(@gemhome, ".gem", "user_cache")
+    @latest_usrcache = File.join(@gemhome, ".gem", "latest_user_cache")
+    @userhome = File.join @tempdir, 'userhome'
+
+    @orig_ENV_HOME = ENV['HOME']
+    ENV['HOME'] = @userhome
+    Gem.instance_variable_set :@user_home, nil
+
+    FileUtils.mkdir_p @gemhome
+    FileUtils.mkdir_p @userhome
+
+    ENV['GEMCACHE'] = @usrcache
+    Gem.use_paths(@gemhome)
+    Gem.loaded_specs.clear
+
+    Gem.configuration.verbose = true
+    Gem.configuration.update_sources = true
+
+    @gem_repo = "http://gems.example.com/"
+    @uri = URI.parse @gem_repo
+    Gem.sources.replace [@gem_repo]
+
+    Gem::SpecFetcher.fetcher = nil
+
+    @orig_BASERUBY = Gem::ConfigMap[:BASERUBY]
+    Gem::ConfigMap[:BASERUBY] = Gem::ConfigMap[:RUBY_INSTALL_NAME]
+
+    @orig_arch = Gem::ConfigMap[:arch]
+
+    @marshal_version = "#{Marshal::MAJOR_VERSION}.#{Marshal::MINOR_VERSION}"
+
+    @private_key = File.expand_path File.join(File.dirname(__FILE__), 'private_key.pem')
+    @public_cert = File.expand_path File.join(File.dirname(__FILE__), 'public_cert.pem')
+
     @app = Rack::Builder.new {
       use GemsAndRdocs, :urls => ['/cache', '/doc'], :root => Gem.dir
-      use Rack::Compress
       run RackRubygems.new
     }
+
     @a1 = quick_gem 'a', '1'
     @a2 = quick_gem 'a', '2'
 
