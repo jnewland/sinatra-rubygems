@@ -66,14 +66,14 @@ class RackRubygems < Sinatra::Base
     Gem.deflate(source_index.latest_specs.map { |spec| spec.full_name }.sort.join("\n"))
   end
 
-  get "/quick/:selector.gemspec.rz" do
+  get "/quick/*.gemspec.rz" do
     content_type 'application/x-deflate'
-    Gem.deflate(quick(params[:selector]).to_yaml)
+    Gem.deflate(quick(params[:splat].first).to_yaml)
   end
 
-  get "/quick/Marshal.#{Gem.marshal_version}/:selector.gemspec.rz" do
+  get "/quick/Marshal.#{Gem.marshal_version}/*.gemspec.rz" do
     content_type 'application/x-deflate'
-    Gem.deflate(marshal(quick(params[:selector])))
+    Gem.deflate(marshal(quick(params[:splat].first)))
   end
 
   def source_index
