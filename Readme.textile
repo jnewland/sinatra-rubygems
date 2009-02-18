@@ -1,0 +1,11 @@
+h2. What is this?
+
+An *almost* complete reimplementation of the @gem server@ command as a "Rack":http://rack.github.com/ application. Mostly, I need a properly mocked gem environment to test gemspec delivery.
+
+h2. Uh, Why?
+
+I really just wanted a RubyGems server running under Passenger instead of webrick. Makes sense.
+
+h2. License
+
+"GPL":http://www.gnu.org/licenses/gpl.html, since RubyGems is GPL.
