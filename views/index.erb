@@ -1,0 +1,5 @@
+<ul>
+  <% @gems.each do |file| %>
+  <li><a href="/doc_root/<%= file.split('/').last %>/rdoc/index.html"><%= file.split('/').last %></a></li>
+  <% end %>
+</ul>
