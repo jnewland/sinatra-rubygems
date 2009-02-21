@@ -43,11 +43,18 @@ end
 
 Spec::Runner.configure do |config|
   config.before(:each) {
+    #mock the gem index
+    @source_index = Gem::SourceIndex.from_gems_in File.expand_path(File.dirname(__FILE__) + "/gems")
+    Gem::SourceIndex.should_receive(:from_gems_in).any_number_of_times.and_return(@source_index.refresh!)
+
+    #sinatra
     @app = Rack::Builder.new {
       use GemsAndRdocs, :urls => ['/cache', '/doc'], :root => Gem.dir
       use Rack::Compress
       run RackRubygems.new
     }
+
+    #webrick
     @webrick = Gem::Server.new Gem.dir, (8000 + $$ % 1000), false
     @webrick_request = WEBrick::HTTPRequest.new :Logger => nil
     @webrick_response = WEBrick::HTTPResponse.new :HTTPVersion => '1.0'
