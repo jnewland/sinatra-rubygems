@@ -145,7 +145,6 @@ class RackRubygems < Sinatra::Base
   end
 
   def source_index
-    return @source_index if @source_index
     @gem_dir = Gem.dir
     @spec_dir = File.join @gem_dir, 'specifications'
     @source_index = Gem::SourceIndex.from_gems_in @spec_dir
