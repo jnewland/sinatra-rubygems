@@ -1,10 +1,35 @@
-h2. What is this?
+h1. sinatra-rubygems
 
-An *almost* complete reimplementation of the @gem server@ command as a "Rack":http://rack.github.com/ application. Mostly, I need a properly mocked gem environment to test gemspec delivery.
+An complete reimplementation of the @gem server@ command as a "Sinatra":http://sinatra.github.com/ application.
 
-h2. Uh, Why?
+h3. Uh, Why?
 
-I really just wanted a RubyGems server running under Passenger instead of webrick. Makes sense.
+* Host your own gem server using Apache + Passenger, not Webrick
+* Drop this project into "PassengerPane":http://github.com/alloy/passengerpane for instant offline access to RDoc Documentation for all installed Rubygems.
+
+h2. Setup
+
+# @git clone git://github.com/jnewland/sinatra-rubygems.git@
+# @open .@
+# Drag the @sinatra-rubygems@ folder into "PassengerPane":http://github.com/alloy/passengerpane. Setup a  "gems.local":http://gems.local/ alias for maximum convenience.
+
+If you're not using PassengerPane, use the following vhost config:
+<code>
+  <pre>
+    <VirtualHost *:80>
+      ServerName gems.local
+      #ServerAlias custom.gem.server.fqdn
+      DocumentRoot "/path/to/sinatra-rubygems/public"
+      RackEnv production
+      <directory "/path/to/src/sinatra-rubygems/public">
+        Order allow,deny
+        Allow from all
+      </directory>
+    </VirtualHost>
+  </pre>
+</code>
+
+If you'd like to run this as a rack app, you can run @rackup config.ru@ in the root of this project, then see the server at "http://localhost:9292":http://localhost:9292.
 
 h2. License
 
