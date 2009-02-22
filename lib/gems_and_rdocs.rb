@@ -14,10 +14,17 @@ class GemsAndRdocs
     can_serve = @urls.any? { |url| path.index(url) == 0 }
 
     if can_serve
-      @file_server.call(env)
+      status, headers, response = @file_server.call(env)
+
+      if (path =~ /doc\// && !(path =~ /index\.html$/))
+        body = ""; response.each { |s| body << s }
+        response = body.gsub(/(<body.*\>)/,'\1<script src="/gemlist.js"></script>')
+        headers["Content-Length"] = response.size.to_s
+      end
     else
       env["PATH_INFO"] = old_path_info
-      @app.call(env)
+      status, headers, response = @app.call(env)
     end
+    [status, headers, response]
   end
 end
