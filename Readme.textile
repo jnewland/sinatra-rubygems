@@ -14,8 +14,8 @@ h2. Setup
 # Drag the @sinatra-rubygems@ folder into "PassengerPane":http://github.com/alloy/passengerpane. Setup a  "gems.local":http://gems.local/ alias for maximum convenience.
 
 If you're not using PassengerPane, use the following vhost config:
-<code>
-  <pre>
+<pre>
+  <code>
     <VirtualHost *:80>
       ServerName gems.local
       #ServerAlias custom.gem.server.fqdn
@@ -26,8 +26,8 @@ If you're not using PassengerPane, use the following vhost config:
         Allow from all
       </directory>
     </VirtualHost>
-  </pre>
-</code>
+  </code>
+</pre>
 
 If you'd like to run this as a rack app, you can run @rackup config.ru@ in the root of this project, then see the server at "http://localhost:9292":http://localhost:9292.
 
