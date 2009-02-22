@@ -78,6 +78,11 @@ class RackRubygems < Sinatra::Base
     erb :index
   end
 
+  get '/gem-server-rdoc-style.css' do
+    content_type 'text/css'
+    File.read File.expand_path(File.dirname(__FILE__) + "/../public/gem-server-rdoc-style.css")
+  end
+
   head "/Marshal.#{Gem.marshal_version}" do
     content_type 'application/octet-stream'
     response['Content-Length'] = source_index.length.to_s
