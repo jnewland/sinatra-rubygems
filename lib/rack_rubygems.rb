@@ -18,12 +18,15 @@ class RackRubygems < Sinatra::Base
   end
 
   get '/gemlist.js' do
+    content_type 'text/javascript'
     specs, total_file_count = get_specs_and_file_count
     
     body = "document.writeln('<select style=\"float:right;margin: 10px 10px 0 0 \" onchange=\"window.parent.location=this.value\">');"
     body << "document.writeln('<option value=\"/\">Gems:</option>');"
     specs.each do |spec|
-      body << "document.writeln(\"<option value='#{spec['doc_path']}'>#{spec['name']} - #{spec['version']}</option>\");"
+      if spec["rdoc_installed"]
+        body << "document.writeln(\"<option value='#{spec['doc_path']}'>#{spec['name']} - #{spec['version']}</option>\");"
+      end
     end
     body << "document.writeln('</select>');"
     body
