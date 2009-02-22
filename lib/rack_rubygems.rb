@@ -4,13 +4,77 @@ require 'yaml'
 require 'zlib'
 require 'erb'
 require 'rubygems'
+require 'rubygems/doc_manager'
 require File.expand_path(File.dirname(__FILE__) + "/rack_compress")
 require File.expand_path(File.dirname(__FILE__) + "/gems_and_rdocs")
 
 class RackRubygems < Sinatra::Base
 
   get '/' do
-    @gems = Dir["#{Gem.dir}/doc/*"].sort
+    specs = []
+    total_file_count = 0
+
+    source_index.each do |path, spec|
+      total_file_count += spec.files.size
+      deps = spec.dependencies.map do |dep|
+        { "name"    => dep.name,
+          "type"    => dep.type,
+          "version" => dep.version_requirements.to_s, }
+      end
+
+      deps = deps.sort_by { |dep| [dep["name"].downcase, dep["version"]] }
+      deps.last["is_last"] = true unless deps.empty?
+
+      # executables
+      executables = spec.executables.sort.collect { |exec| {"executable" => exec} }
+      executables = nil if executables.empty?
+      executables.last["is_last"] = true if executables
+
+      specs << {
+        "authors"             => spec.authors.sort.join(", "),
+        "date"                => spec.date.to_s,
+        "dependencies"        => deps,
+        "doc_path"            => "/doc_root/#{spec.full_name}/rdoc/index.html",
+        "executables"         => executables,
+        "only_one_executable" => (executables && executables.size == 1),
+        "full_name"           => spec.full_name,
+        "has_deps"            => !deps.empty?,
+        "homepage"            => spec.homepage,
+        "name"                => spec.name,
+        "rdoc_installed"      => Gem::DocManager.new(spec).rdoc_installed?,
+        "summary"             => spec.summary,
+        "version"             => spec.version.to_s,
+      }
+    end
+
+    specs << {
+      "authors" => "Chad Fowler, Rich Kilmer, Jim Weirich, Eric Hodel and others",
+      "dependencies" => [],
+      "doc_path" => "/doc_root/rubygems-#{Gem::RubyGemsVersion}/rdoc/index.html",
+      "executables" => [{"executable" => 'gem', "is_last" => true}],
+      "only_one_executable" => true,
+      "full_name" => "rubygems-#{Gem::RubyGemsVersion}",
+      "has_deps" => false,
+      "homepage" => "http://rubygems.org/",
+      "name" => 'rubygems',
+      "rdoc_installed" => true,
+      "summary" => "RubyGems itself",
+      "version" => Gem::RubyGemsVersion,
+    }
+
+    specs = specs.sort_by { |spec| [spec["name"].downcase, spec["version"]] }
+    specs.last["is_last"] = true
+
+    # tag all specs with first_name_entry
+    last_spec = nil
+    specs.each do |spec|
+      is_first = last_spec.nil? || (last_spec["name"].downcase != spec["name"].downcase)
+      spec["first_name_entry"] = is_first
+      last_spec = spec
+    end
+
+    @values = { "gem_count" => specs.size.to_s, "specs" => specs,
+               "total_file_count" => total_file_count.to_s }
     erb :index
   end
 

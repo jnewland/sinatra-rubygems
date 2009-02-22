@@ -2,7 +2,9 @@ require File.expand_path(File.dirname(__FILE__) + "/spec_helper.rb")
 
 describe "The Rack Rubygems Server" do
 
-  it "serves a list of gems up at the root"
+  it "serves a list of gems up at the root" do
+    should_match_webrick_behavior "/", :root
+  end
 
   describe "serves some static files" do
 
