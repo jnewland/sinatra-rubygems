@@ -82,7 +82,7 @@ describe "The Rack Rubygems Server" do
     end
 
     it "via name, version, and platform" do
-      should_match_webrick_behavior "/quick/sinatra-0.9.0.4-#{Gem::Platform.local}.gemspec.rz", :quick
+      should_match_webrick_behavior "/quick/sinatra-0.9.0.4-ruby.gemspec.rz", :quick
     end
 
     it "returns a 404 when accessing a missing gem" do
@@ -95,7 +95,7 @@ describe "The Rack Rubygems Server" do
     end
 
     it "marshalled via name, version, and platform" do
-      should_match_webrick_behavior "/quick/Marshal.#{Gem.marshal_version}/sinatra-0.9.0.4-#{Gem::Platform.local}.gemspec.rz", :quick
+      should_match_webrick_behavior "/quick/Marshal.#{Gem.marshal_version}/sinatra-0.9.0.4-ruby.gemspec.rz", :quick
     end
   end
 

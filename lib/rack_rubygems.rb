@@ -71,14 +71,13 @@ class RackRubygems < Sinatra::Base
     Gem.deflate(source_index.latest_specs.map { |spec| spec.full_name }.sort.join("\n"))
   end
 
+  get "/quick/Marshal.#{Gem.marshal_version}/*.gemspec.rz" do
+    Gem.deflate(marshal(quick(params[:splat].first), 'application/x-deflate'))
+  end
+
   get "/quick/*.gemspec.rz" do
     content_type 'application/x-deflate'
     Gem.deflate(quick(params[:splat].first).to_yaml)
-  end
-
-  get "/quick/Marshal.#{Gem.marshal_version}/*.gemspec.rz" do
-    content_type 'application/x-deflate'
-    Gem.deflate(marshal(quick(params[:splat].first)))
   end
 
   def source_index
@@ -96,8 +95,6 @@ class RackRubygems < Sinatra::Base
     return unless selector =~ /(.*?)-([0-9.]+)(-.*?)?/
     name, version, platform = $1, $2, $3
     specs = source_index.search Gem::Dependency.new(name, version)
-
-    selector = [name, version, platform].map { |s| s.inspect }.join ' '
 
     if platform
       platform = Gem::Platform.new platform.sub(/^-/, '')
@@ -118,8 +115,8 @@ class RackRubygems < Sinatra::Base
     end
   end
 
-  def marshal(data)
-    content_type 'application/octet-stream'
+  def marshal(data, type = 'application/octet-stream')
+    content_type type
     Marshal.dump(data)
   end
 
