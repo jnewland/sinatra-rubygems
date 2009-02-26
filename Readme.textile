@@ -33,4 +33,4 @@ If you'd like to run this as a rack app, you can run @rackup config.ru@ in the r
 
 h2. License
 
-"GPL":http://www.gnu.org/licenses/gpl.html, since RubyGems is GPL.
+Distributed under the same terms as Ruby.
